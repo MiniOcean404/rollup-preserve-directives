@@ -78,7 +78,7 @@ function preserveDirectives(): Plugin {
             // @ts-expect-error
             // rollup 2 built-in parser doesn't have `allowShebang`, we need to use the sliced code here. Hence the `magicString.toString()`
             allowShebang: true,
-            jsx:true
+            jsx: true,
           }) as Node;
         } catch (e) {
           this.warn({
