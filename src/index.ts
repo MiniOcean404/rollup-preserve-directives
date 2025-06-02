@@ -72,12 +72,13 @@ function preserveDirectives(): Plugin {
          */
         let ast: null | Node = null;
         try {
-          
+
           ast = this.parse(magicString.toString(), {
             allowReturnOutsideFunction: true,
             // @ts-expect-error
             // rollup 2 built-in parser doesn't have `allowShebang`, we need to use the sliced code here. Hence the `magicString.toString()`
-            allowShebang: true
+            allowShebang: true,
+            jsx:true
           }) as Node;
         } catch (e) {
           this.warn({
@@ -148,7 +149,7 @@ function preserveDirectives(): Plugin {
             directives: Array.from(meta.directives[id] || []),
             shebang: meta.shebangs.get(id) || null,
           }
-        }        
+        }
 
         return {
           code: magicString.toString(),
