@@ -1,5 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`preserve-directive (rollup 2) fix jsx preserve 1`] = `
+{
+  "index": "function jsx() {
+    return /*#__PURE__*/ React.createElement("div", null, "Hello");
+}
+
+export { jsx as default };
+",
+}
+`;
+
 exports[`preserve-directive (rollup 2) fix string constant introduced by rollup commonjs 1`] = `
 {
   "index": "import require$$0 from 'react';
@@ -170,6 +181,17 @@ function foo() {
 }
 
 export { foo };
+",
+}
+`;
+
+exports[`preserve-directive (rollup 4) fix jsx preserve 1`] = `
+{
+  "index": "function jsx() {
+    return /*#__PURE__*/ React.createElement("div", null, "Hello");
+}
+
+export { jsx as default };
 ",
 }
 `;

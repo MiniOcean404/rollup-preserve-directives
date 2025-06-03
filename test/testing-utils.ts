@@ -1,66 +1,75 @@
-import path from 'path';
-import { Module } from 'module';
-import type { rollup, Plugin as RollupPlugin } from 'rollup';
+import path from "path"
+import { Module } from "module"
+import type { JsxOptions, JsxPreset, rollup, Plugin as RollupPlugin } from "rollup"
 
-import { swc } from 'rollup-plugin-swc3';
-import preserveDirective from '../src';
+import { swc } from "rollup-plugin-swc3"
+import preserveDirective from "../src"
 
-import type { ExternalOption, InputOption } from 'rollup';
+import type { ExternalOption, InputOption } from "rollup"
 
 interface BuildTestOption {
-  input?: InputOption,
-  sourcemap?: boolean,
-  dir?: string,
+  input?: InputOption
+  sourcemap?: boolean
+  dir?: string
   external?: ExternalOption
-  version?: number,
+  version?: number
   otherPlugins?: RollupPlugin[]
+  jsx?: false | JsxPreset | JsxOptions
 }
 
-const DEFAULT_EXTERNAL = ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'].concat(Module.builtinModules);
+const DEFAULT_EXTERNAL = [
+  "react",
+  "react-dom",
+  "react/jsx-runtime",
+  "react/jsx-dev-runtime",
+].concat(Module.builtinModules)
 
 export const tester = async (
   rollupImpl: typeof rollup,
   {
-    input = './fixture/index.js',
+    input = "./fixture/index.js",
     sourcemap = false,
-    dir = path.resolve(__dirname, 'fixtures'),
+    dir = path.resolve(__dirname, "fixtures"),
     external = DEFAULT_EXTERNAL,
     version,
-    otherPlugins = []
-  }: BuildTestOption = {}
+    otherPlugins = [],
+    jsx = false,
+  }: BuildTestOption = {},
 ) => {
   const build = await rollupImpl({
     input: (() => {
-      if (typeof input === 'string') {
-        return path.resolve(dir, input);
+      if (typeof input === "string") {
+        return path.resolve(dir, input)
       }
       if (Array.isArray(input)) {
-        return input.map((v) => path.resolve(dir, v));
+        return input.map((v) => path.resolve(dir, v))
       }
       return Object.entries(input).reduce<Record<string, string>>((acc, [key, value]) => {
-        acc[key] = path.resolve(dir, value);
-        return acc;
-      }, {});
+        acc[key] = path.resolve(dir, value)
+        return acc
+      }, {})
     })() as any,
     plugins: [...otherPlugins, preserveDirective(), swc()] as any, // rollup 2 & rollup 3 type is incompatible
     external,
+
     onwarn(warning, warn) {
       if (version === 2) {
-        if (warning.code === 'MODULE_LEVEL_DIRECTIVE') {
+        if (warning.code === "MODULE_LEVEL_DIRECTIVE") {
           return
         }
         warn(warning)
       }
-    }
-  });
+    },
+    ...(version && version > 2 ? { jsx } : {}),
+  })
 
-  const { output } = await build.generate({ format: 'esm', sourcemap });
+  const { output } = await build.generate({ format: "esm", sourcemap })
 
   return output.reduce<Record<string, string>>((acc, cur) => {
-    if ('code' in cur) {
-      acc[cur.name] = cur.code;
+    if ("code" in cur) {
+      acc[cur.name] = cur.code
     }
     // OutputAssets are intentionally ignored
-    return acc;
-  }, {});
-};
+    return acc
+  }, {})
+}
